@@ -25,7 +25,7 @@ def get_stock_data(stock: str):
     return StockData(name=stock,
                      price=soup.find(id=ele_id).find_all(attrs={"data-reactid": '32'})[0].text,
                      change=soup.find(id=ele_id).find_all(attrs={"data-reactid": '33'})[0].text,
-                     pre_price=pre_prices[0].text if (pre_prices := soup.find(id=ele_id).find_all(attrs={"data-reactid": '38'})) else None,
+                     pre_price=pre_prices[0].text if (pre_prices := soup.find(id=ele_id).find_all(attrs={"data-reactid": '37'})) else None,
                      pre_change=pre_changes[0].text if (pre_changes := soup.find(id=ele_id).find_all(attrs={"data-reactid": '40'})) else None)
 
 
