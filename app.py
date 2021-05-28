@@ -1,6 +1,6 @@
 from time import sleep
 import requests
-from colorama import init, Fore
+from colorama import init, Fore, Style
 from collections import namedtuple
 from bs4 import BeautifulSoup
 
@@ -24,26 +24,40 @@ def get_stock_data(stock: str):
                          id=ele_id).find_all(attrs={"data-reactid": '40'}) else None)
 
 
+def change_color(change):
+    return Fore.GREEN if '+' in change else Fore.RED
+
+
 def start():
+    pre_name = '- pre'
     while True:
-        for stock in stocks:
-            data = get_stock_data(stock)
-            print('{color_main}{name}:\t{price} $\t{color_change}{change}'.format(
-                color_main=Fore.WHITE,
-                name=data.name,
-                price=data.price,
-                color_change=Fore.GREEN if '+' in data.change else Fore.RED,
-                change=data.change))
-            if data.pre_price is not None:
-                print('{color_main}- pre\t{pre_price} $\t{color_change}{pre_change}'.format(
-                    color_main=Fore.WHITE,
-                    pre_price=data.pre_price,
-                    color_change=Fore.GREEN if '+' in data.pre_change else Fore.RED,
-                    pre_change=data.pre_change))
+        loaded_data = [get_stock_data(stock) for stock in stocks]
+        name_width = max([len(stock) for stock in stocks])
+        price_width = max([len(data.price) for data in loaded_data])
+        delimiter_width = 0
+
+        for mode in ('measure', 'print'):
+            for data in loaded_data:
+                values = [(data.name, data.price, data.change)]
+
+                if data.pre_price:
+                    values.append((pre_name, data.pre_price, data.pre_change))
+                    name_width = max(len(pre_name), name_width)
+
+                for name, price, change in values:
+                    out = '{name}: {price} $ {color_change}{change}{reset}'.format(
+                            name=name.ljust(name_width),
+                            price=price.rjust(price_width),
+                            color_change=change_color(change) if mode == 'print' else '',
+                            change=change,
+                            reset=Style.RESET_ALL if mode == 'print' else '')
+                    if mode == 'print':
+                        print(out)
+                    else:
+                        delimiter_width = max(delimiter_width, len(out))
+
+        print('=' * delimiter_width)
         sleep(30)
-        print('{color_main}{break_char}'.format(
-            color_main=Fore.WHITE,
-            break_char='=' * 32))
 
 
 if __name__ == '__main__':
