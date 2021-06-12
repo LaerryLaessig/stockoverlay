@@ -87,10 +87,8 @@ def start():
     pre_name = '- pre'
     post_name = '- post'
     while True:
-        loaded_data = format_stock_data(get_yahoo_stock_data(stocks))
-
         to_print = []
-        for data in loaded_data:
+        for data in format_stock_data(get_yahoo_stock_data(stocks)):
             to_print.append((data.name, data.price, data.change, data.change_prct))
 
             if data.pre_price:
