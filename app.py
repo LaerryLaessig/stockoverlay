@@ -4,65 +4,122 @@
 # can do whatever you want with this stuff. If we meet some day, and you think
 # this stuff is worth it, you can buy me a beer in return LaerryLaessig
 # ----------------------------------------------------------------------------
-
+import json
+from collections import namedtuple
 from time import sleep
+
 import requests
 from colorama import init, Fore, Style
-from collections import namedtuple
-from bs4 import BeautifulSoup
-
-StockData = namedtuple('Stock', 'name price change pre_price pre_change')
 
 stocks = ['AMC', 'GRWG']
 
-url = 'https://finance.yahoo.com/quote'
-ele_id = 'quote-header-info'
+# raw data
+StockData = namedtuple('StockData', 'name currency price change change_prct \
+                                     pre_price pre_change pre_change_prct \
+                                     post_price post_change post_change_prct')
+# raw data formatted for printing
+FormattedStockData = namedtuple('FormattedStockData', 'name price change change_prct \
+                                                       pre_price pre_change pre_change_prct \
+                                                       post_price post_change post_change_prct')
 
 
-def get_stock_data(stock: str):
-    responce = requests.request('GET', url='{}/{}'.format(url, stock))
-    soup = BeautifulSoup(responce.content, "html.parser")
-    return StockData(name=stock,
-                     price=soup.find(id=ele_id).find_all(attrs={"data-reactid": '32'})[0].text,
-                     change=soup.find(id=ele_id).find_all(attrs={"data-reactid": '33'})[0].text,
-                     pre_price=pre_prices[0].text if (pre_prices := soup.find(id=ele_id).find_all(attrs={"data-reactid": '37'})) else None,
-                     pre_change=pre_changes[0].text if (pre_changes := soup.find(id=ele_id).find_all(attrs={"data-reactid": '40'})) else None)
+def currency_as_str(currency):
+    if currency == 'USD':
+        return '$'
+    raise RuntimeError('Found unsupported currency: {}'.format(currency))
+
+
+def format_stock_data(data: [StockData]):
+    fmt_price = lambda x, y: '{:+.2f}{}'.format(x, y)
+    fmt_change = lambda x: '{:+.2f}'.format(x)
+    fmt_prct = lambda x: '{:+.2f}%'.format(x)
+    return [FormattedStockData(
+        name=d.name,
+        price=fmt_price(d.price, currency_as_str(d.currency)),
+        change=fmt_change(d.change),
+        change_prct=fmt_prct(d.change_prct),
+        pre_price=fmt_price(d.pre_price, currency_as_str(d.currency)) if d.pre_price else None,
+        pre_change=fmt_change(d.pre_change) if d.pre_change else None,
+        pre_change_prct=fmt_prct(d.pre_change_prct) if d.pre_change_prct else None,
+        post_price=fmt_price(d.post_price, currency_as_str(d.currency)) if d.post_price else None,
+        post_change=fmt_change(d.post_change) if d.post_change else None,
+        post_change_prct=fmt_prct(d.post_change_prct) if d.post_change_prct else None,
+    ) for d in data]
+
+
+def get_yahoo_stock_data(stonks: [str]):
+    base_url = 'https://query2.finance.yahoo.com/v7/finance/quote'
+    symbols = ','.join(stonks)
+    fields = ','.join(('currency',
+                       'preMarketPrice', 'preMarketChange', 'preMarketChangePercent',
+                       'regularMarketPrice', 'regularMarketChange', 'regularMarketChangePercent',
+                       'postMarketPrice', 'postMarketChange', 'postMarketChangePercent'))
+    query = '{}?symbols={}&fields={}'.format(base_url, symbols, fields)
+
+    response = requests.request('GET', query)
+    if response.status_code != 200:
+        raise RuntimeError("Failed to parse Yahoo's response:\n{}", response.text)
+
+    parsed = json.loads(response.text)
+    assert parsed['quoteResponse']
+    assert parsed['quoteResponse']['result']
+
+    return (StockData(
+        name=r['symbol'],
+        currency=r['currency'],
+        price=r['regularMarketPrice'],
+        change=r['regularMarketChange'],
+        change_prct=r['regularMarketChangePercent'],
+        pre_price=r['preMarketPrice'] if 'preMarketPrice' in r else None,
+        pre_change=r['preMarketChange'] if 'preMarketChange' in r else None,
+        pre_change_prct=r['preMarketChangePercent'] if 'preMarketChangePercent' in r else None,
+        post_price=r['postMarketPrice'] if 'postMarketPrice' in r else None,
+        post_change=r['postMarketChange'] if 'postMarketChange' in r else None,
+        post_change_prct=r['postMarketChangePercent'] if 'postMarketChangePercent' in r else None,
+    ) for r in parsed['quoteResponse']['result'])
 
 
 def change_color(change):
-    return Fore.GREEN if '+' in change else Fore.RED
+    return Fore.GREEN if '+' in change else Fore.RED if '-' in change else ''
 
 
 def start():
     pre_name = '- pre'
+    post_name = '- post'
     while True:
-        loaded_data = [get_stock_data(stock) for stock in stocks]
-        name_width = max([len(stock) for stock in stocks])
-        price_width = max([len(data.price) for data in loaded_data])
+        to_print = []
+        for data in format_stock_data(get_yahoo_stock_data(stocks)):
+            to_print.append((data.name, data.price, data.change, data.change_prct))
+
+            if data.pre_price:
+                to_print.append((pre_name, data.pre_price, data.pre_change, data.pre_change_prct))
+
+            if data.post_price:
+                to_print.append((post_name, data.post_price, data.post_change, data.post_change_prct))
+
+        name_width = max([len(d[0]) for d in to_print])
+        price_width = max([len(d[1]) for d in to_print])
+        change_width = max([len(d[2]) for d in to_print])
+        change_prct_width = max([len(d[3]) for d in to_print])
         delimiter_width = 0
 
         for mode in ('measure', 'print'):
-            for data in loaded_data:
-                values = [(data.name, data.price, data.change)]
-
-                if data.pre_price:
-                    values.append((pre_name, data.pre_price, data.pre_change))
-                    name_width = max(len(pre_name), name_width)
-
-                for name, price, change in values:
-                    out = '{name}: {price} $ {color_change}{change}{reset}'.format(
-                            name=name.ljust(name_width),
-                            price=price.rjust(price_width),
-                            color_change=change_color(change) if mode == 'print' else '',
-                            change=change,
-                            reset=Style.RESET_ALL if mode == 'print' else '')
-                    if mode == 'print':
-                        print(out)
-                    else:
-                        delimiter_width = max(delimiter_width, len(out))
+            for name, price, change, change_prct in to_print:
+                out = '{name}: {price} {color_change}{change} {change_prct}{reset}'.format(
+                        name=name.ljust(name_width),
+                        price=price.rjust(price_width),
+                        color_change=change_color(change) if mode == 'print' else '',
+                        change=change.rjust(change_width),
+                        change_prct=change_prct.rjust(change_prct_width),
+                        reset=Style.RESET_ALL if mode == 'print' else '')
+                if mode == 'print':
+                    print(out)
+                else:
+                    delimiter_width = max(delimiter_width, len(out))
 
         print('=' * delimiter_width)
-        sleep(30)
+        # public api is limited by 2000 requests per hour
+        sleep(3600//2000+1)
 
 
 if __name__ == '__main__':
