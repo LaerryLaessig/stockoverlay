@@ -30,17 +30,20 @@ def currency_as_str(currency):
 
 
 def format_stock_data(data: [StockData]):
+    fmt_price = lambda x, y: '{:+.2f}{}'.format(x, y)
+    fmt_change = lambda x: '{:+.2f}'.format(x)
+    fmt_prct = lambda x: '{:+.2f}%'.format(x)
     return [FormattedStockData(
         name=d.name,
-        price='{:+.2f}{}'.format(d.price, currency_as_str(d.currency)),
-        change='{:+.2f}'.format(d.change),
-        change_prct='{:+.2f}%'.format(d.change_prct),
-        pre_price='{:+.2f}{}'.format(d.pre_price, currency_as_str(d.currency)) if d.pre_price else None,
-        pre_change='{:+.2f}'.format(d.pre_change) if d.pre_change else None,
-        pre_change_prct='{:+.2f}%'.format(d.pre_change_prct) if d.pre_change_prct else None,
-        post_price='{:+.2f}{}'.format(d.post_price, currency_as_str(d.currency)) if d.post_price else None,
-        post_change='{:+.2f}'.format(d.post_change) if d.post_change else None,
-        post_change_prct='{:+.2f}%'.format(d.post_change_prct) if d.post_change_prct else None,
+        price=fmt_price(d.price, currency_as_str(d.currency)),
+        change=fmt_change(d.change),
+        change_prct=fmt_prct(d.change_prct),
+        pre_price=fmt_price(d.pre_price, currency_as_str(d.currency)) if d.pre_price else None,
+        pre_change=fmt_change(d.pre_change) if d.pre_change else None,
+        pre_change_prct=fmt_prct(d.pre_change_prct) if d.pre_change_prct else None,
+        post_price=fmt_price(d.post_price, currency_as_str(d.currency)) if d.post_price else None,
+        post_change=fmt_change(d.post_change) if d.post_change else None,
+        post_change_prct=fmt_prct(d.post_change_prct) if d.post_change_prct else None,
     ) for d in data]
 
 
