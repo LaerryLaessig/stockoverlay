@@ -80,7 +80,7 @@ def get_yahoo_stock_data(stonks: [str]):
 
 
 def change_color(change):
-    return Fore.GREEN if '+' in change else Fore.RED
+    return Fore.GREEN if '+' in change else Fore.RED if '-' in change else ''
 
 
 def start():

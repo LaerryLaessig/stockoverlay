@@ -1,6 +1,8 @@
 import unittest
 
-from app import currency_as_str, StockData, format_stock_data, FormattedStockData
+from colorama import Fore
+
+from app import currency_as_str, StockData, format_stock_data, FormattedStockData, change_color
 
 
 class CurrencyAsStr(unittest.TestCase):
@@ -61,6 +63,17 @@ class FormatStockData(unittest.TestCase):
                                      post_change=None,
                                      post_change_prct=None)]
         self.assertEqual(format_stock_data(data), result)
+
+
+class ChangeColor(unittest.TestCase):
+    def test_postiv(self):
+        self.assertEqual(change_color('text + text'), Fore.GREEN)
+
+    def test_negativ(self):
+        self.assertEqual(change_color('text - text'), Fore.RED)
+
+    def test_zero(self):
+        self.assertEqual(change_color('text text'), '')
 
 
 if __name__ == '__main__':
