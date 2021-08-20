@@ -26,6 +26,8 @@ FormattedStockData = namedtuple('FormattedStockData', 'name price change change_
 def currency_as_str(currency):
     if currency == 'USD':
         return '$'
+    if currency == 'EUR':
+        return '€'
     raise RuntimeError('Found unsupported currency: {}'.format(currency))
 
 
