@@ -4,7 +4,6 @@
 # can do whatever you want with this stuff. If we meet some day, and you think
 # this stuff is worth it, you can buy me a beer in return LaerryLaessig
 # ----------------------------------------------------------------------------
-import json
 from collections import namedtuple
 from time import sleep
 
@@ -26,6 +25,8 @@ FormattedStockData = namedtuple('FormattedStockData', 'name price change change_
 def currency_as_str(currency):
     if currency == 'USD':
         return '$'
+    if currency == 'EUR':
+        return '€'
     raise RuntimeError('Found unsupported currency: {}'.format(currency))
 
 
@@ -56,11 +57,11 @@ def get_yahoo_stock_data(stonks: [str]):
                        'postMarketPrice', 'postMarketChange', 'postMarketChangePercent'))
     query = '{}?symbols={}&fields={}'.format(base_url, symbols, fields)
 
-    response = requests.request('GET', query)
+    response = requests.get(query, headers={'User-agent': 'Mozilla/5.0'})
     if response.status_code != 200:
         raise RuntimeError("Failed to parse Yahoo's response:\n{}", response.text)
 
-    parsed = json.loads(response.text)
+    parsed = response.json()
     assert parsed['quoteResponse']
     assert parsed['quoteResponse']['result']
 
