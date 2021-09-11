@@ -2,7 +2,7 @@ import unittest
 
 from colorama import Fore
 
-from app import currency_as_str, StockData, format_stock_data, FormattedStockData, change_color
+from list_prices import currency_as_str, StockData, format_stock_data, FormattedStockData, change_color
 
 
 class CurrencyAsStr(unittest.TestCase):
