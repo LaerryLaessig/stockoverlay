@@ -66,17 +66,17 @@ def get_yahoo_stock_data(stonks: [str]):
     assert parsed['quoteResponse']['result']
 
     return (StockData(
-        name=r['symbol'],
-        currency=r['currency'],
-        price=r['regularMarketPrice'],
-        change=r['regularMarketChange'],
-        change_prct=r['regularMarketChangePercent'],
-        pre_price=r['preMarketPrice'] if 'preMarketPrice' in r else '',
-        pre_change=r['preMarketChange'] if 'preMarketChange' in r else '',
-        pre_change_prct=r['preMarketChangePercent'] if 'preMarketChangePercent' in r else '',
-        post_price=r['postMarketPrice'] if 'postMarketPrice' in r else '',
-        post_change=r['postMarketChange'] if 'postMarketChange' in r else '',
-        post_change_prct=r['postMarketChangePercent'] if 'postMarketChangePercent' in r else '',
+        name=r.get('symbol'),
+        currency=r.get('currency'),
+        price=r.get('regularMarketPrice'),
+        change=r.get('regularMarketChange'),
+        change_prct=r.get('regularMarketChangePercent'),
+        pre_price=r.get('preMarketPrice', ''),
+        pre_change=r.get('preMarketChange', ''),
+        pre_change_prct=r.get('preMarketChangePercent', ''),
+        post_price=r.get('postMarketPrice', ''),
+        post_change=r.get('postMarketChange', ''),
+        post_change_prct=r.get('postMarketChangePercent', '')
     ) for r in parsed['quoteResponse']['result'])
 
 
