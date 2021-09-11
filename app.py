@@ -10,7 +10,7 @@ from time import sleep
 import requests
 from colorama import init, Fore, Style
 
-stocks = ['AMC', 'GRWG']
+stocks = ('AMC', 'GRWG')
 
 # raw data
 StockData = namedtuple('StockData', 'name currency price change change_prct \
