@@ -38,7 +38,7 @@ class FormatStockData(unittest.TestCase):
                                      post_price='+3.00$',
                                      post_change='+1.35',
                                      post_change_prct='+8.99%')]
-        self.assertEqual(format_stock_data(data), result)
+        self.assertEqual(list(format_stock_data(data)), result)
 
     def test_min_data(self):
         data = [StockData(name='stock_name',
@@ -56,13 +56,13 @@ class FormatStockData(unittest.TestCase):
                                      price='+1.23$',
                                      change='+0.35',
                                      change_prct='+23.46%',
-                                     pre_price=None,
-                                     pre_change=None,
-                                     pre_change_prct=None,
-                                     post_price=None,
-                                     post_change=None,
-                                     post_change_prct=None)]
-        self.assertEqual(format_stock_data(data), result)
+                                     pre_price='',
+                                     pre_change='',
+                                     pre_change_prct='',
+                                     post_price='',
+                                     post_change='',
+                                     post_change_prct='')]
+        self.assertEqual(list(format_stock_data(data)), result)
 
 
 class ChangeColor(unittest.TestCase):
