@@ -31,9 +31,15 @@ def currency_as_str(currency):
 
 
 def format_stock_data(data: [StockData]):
-    fmt_price = lambda x, y: '{:+.2f}{}'.format(x, y)
-    fmt_change = lambda x: '{:+.2f}'.format(x)
-    fmt_prct = lambda x: '{:+.2f}%'.format(x)
+    def fmt_price(x, y):
+        return '{:+.2f}{}'.format(x, y)
+
+    def fmt_change(x):
+        return '{:+.2f}'.format(x)
+
+    def fmt_prct(x):
+        return '{:+.2f}%'.format(x)
+
     return (FormattedStockData(
         name=d.name,
         price=fmt_price(d.price, currency_as_str(d.currency)),
