@@ -107,12 +107,12 @@ def start():
         for mode in ('measure', 'print'):
             for name, price, change, change_prct in to_print:
                 out = '{name}: {price} {color_change}{change} {change_prct}{reset}'.format(
-                        name=name.ljust(name_width),
-                        price=price.rjust(price_width),
-                        color_change=change_color(change) if mode == 'print' else '',
-                        change=change.rjust(change_width),
-                        change_prct=change_prct.rjust(change_prct_width),
-                        reset=Style.RESET_ALL if mode == 'print' else '')
+                    name=name.ljust(name_width),
+                    price=price.rjust(price_width),
+                    color_change=change_color(change) if mode == 'print' else '',
+                    change=change.rjust(change_width),
+                    change_prct=change_prct.rjust(change_prct_width),
+                    reset=Style.RESET_ALL if mode == 'print' else '')
                 if mode == 'print':
                     print(out)
                 else:
@@ -120,7 +120,7 @@ def start():
 
         print('=' * delimiter_width)
         # public api is limited by 2000 requests per hour
-        sleep(3600//2000+1)
+        sleep(3600 // 2000 + 1)
 
 
 if __name__ == '__main__':
