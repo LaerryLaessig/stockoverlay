@@ -34,7 +34,7 @@ def format_stock_data(data: [StockData]):
     fmt_price = lambda x, y: '{:+.2f}{}'.format(x, y)
     fmt_change = lambda x: '{:+.2f}'.format(x)
     fmt_prct = lambda x: '{:+.2f}%'.format(x)
-    return [FormattedStockData(
+    return (FormattedStockData(
         name=d.name,
         price=fmt_price(d.price, currency_as_str(d.currency)),
         change=fmt_change(d.change),
@@ -45,7 +45,7 @@ def format_stock_data(data: [StockData]):
         post_price=fmt_price(d.post_price, currency_as_str(d.currency)) if d.post_price else '',
         post_change=fmt_change(d.post_change) if d.post_change else '',
         post_change_prct=fmt_prct(d.post_change_prct) if d.post_change_prct else '',
-    ) for d in data]
+    ) for d in data)
 
 
 def get_yahoo_stock_data(stonks: [str]):
