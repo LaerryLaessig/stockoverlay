@@ -10,7 +10,7 @@ from time import sleep
 import requests
 from colorama import init, Fore, Style
 
-stocks = ['AMC', 'GRWG']
+stocks = ('AMC', 'GRWG')
 
 # raw data
 StockData = namedtuple('StockData', 'name currency price change change_prct \
@@ -31,10 +31,16 @@ def currency_as_str(currency):
 
 
 def format_stock_data(data: [StockData]):
-    fmt_price = lambda x, y: '{:+.2f}{}'.format(x, y)
-    fmt_change = lambda x: '{:+.2f}'.format(x)
-    fmt_prct = lambda x: '{:+.2f}%'.format(x)
-    return [FormattedStockData(
+    def fmt_price(x, y):
+        return '{:+.2f}{}'.format(x, y)
+
+    def fmt_change(x):
+        return '{:+.2f}'.format(x)
+
+    def fmt_prct(x):
+        return '{:+.2f}%'.format(x)
+
+    return (FormattedStockData(
         name=d.name,
         price=fmt_price(d.price, currency_as_str(d.currency)),
         change=fmt_change(d.change),
@@ -45,7 +51,7 @@ def format_stock_data(data: [StockData]):
         post_price=fmt_price(d.post_price, currency_as_str(d.currency)) if d.post_price else '',
         post_change=fmt_change(d.post_change) if d.post_change else '',
         post_change_prct=fmt_prct(d.post_change_prct) if d.post_change_prct else '',
-    ) for d in data]
+    ) for d in data)
 
 
 def get_yahoo_stock_data(stonks: [str]):
@@ -66,17 +72,17 @@ def get_yahoo_stock_data(stonks: [str]):
     assert parsed['quoteResponse']['result']
 
     return (StockData(
-        name=r['symbol'],
-        currency=r['currency'],
-        price=r['regularMarketPrice'],
-        change=r['regularMarketChange'],
-        change_prct=r['regularMarketChangePercent'],
-        pre_price=r['preMarketPrice'] if 'preMarketPrice' in r else '',
-        pre_change=r['preMarketChange'] if 'preMarketChange' in r else '',
-        pre_change_prct=r['preMarketChangePercent'] if 'preMarketChangePercent' in r else '',
-        post_price=r['postMarketPrice'] if 'postMarketPrice' in r else '',
-        post_change=r['postMarketChange'] if 'postMarketChange' in r else '',
-        post_change_prct=r['postMarketChangePercent'] if 'postMarketChangePercent' in r else '',
+        name=r.get('symbol'),
+        currency=r.get('currency'),
+        price=r.get('regularMarketPrice'),
+        change=r.get('regularMarketChange'),
+        change_prct=r.get('regularMarketChangePercent'),
+        pre_price=r.get('preMarketPrice', ''),
+        pre_change=r.get('preMarketChange', ''),
+        pre_change_prct=r.get('preMarketChangePercent', ''),
+        post_price=r.get('postMarketPrice', ''),
+        post_change=r.get('postMarketChange', ''),
+        post_change_prct=r.get('postMarketChangePercent', '')
     ) for r in parsed['quoteResponse']['result'])
 
 
@@ -107,12 +113,12 @@ def start():
         for mode in ('measure', 'print'):
             for name, price, change, change_prct in to_print:
                 out = '{name}: {price} {color_change}{change} {change_prct}{reset}'.format(
-                        name=name.ljust(name_width),
-                        price=price.rjust(price_width),
-                        color_change=change_color(change) if mode == 'print' else '',
-                        change=change.rjust(change_width),
-                        change_prct=change_prct.rjust(change_prct_width),
-                        reset=Style.RESET_ALL if mode == 'print' else '')
+                    name=name.ljust(name_width),
+                    price=price.rjust(price_width),
+                    color_change=change_color(change) if mode == 'print' else '',
+                    change=change.rjust(change_width),
+                    change_prct=change_prct.rjust(change_prct_width),
+                    reset=Style.RESET_ALL if mode == 'print' else '')
                 if mode == 'print':
                     print(out)
                 else:
@@ -120,7 +126,7 @@ def start():
 
         print('=' * delimiter_width)
         # public api is limited by 2000 requests per hour
-        sleep(3600//2000+1)
+        sleep(3600 // 2000 + 1)
 
 
 if __name__ == '__main__':
