@@ -38,6 +38,10 @@ def generate_bar(low, high, current, width=40):
     return ''.join(tokens)
 
 
+def date_to_seconds_since_epoch(t):
+    return int((t - datetime.date(1970, 1, 1)).total_seconds())
+
+
 def yahoo_query(query):
     response = requests.get(query, headers={'User-agent': 'Mozilla/5.0'})
     if response.status_code != 200:
@@ -50,7 +54,9 @@ def yahoo_query_historical_lows_highs(start, end, symbols):
     url_template = 'https://query1.finance.yahoo.com/v7/finance/download/{}?period1={}&period2={}' \
                    '&interval=1d&events=history'
     for symbol in symbols:
-        response = yahoo_query(url_template.format(symbol, start.strftime('%s'), end.strftime('%s')))
+        response = yahoo_query(url_template.format(symbol,
+                                                   date_to_seconds_since_epoch(start),
+                                                   date_to_seconds_since_epoch(end)))
         rows = [line.split(',') for line in response.text.splitlines()]
         headers = rows.pop(0)
         low_idx, high_idx = headers.index('Low'), headers.index('High')
@@ -73,11 +79,12 @@ def yahoo_query_quotes(symbols):
 
 
 def main_loop(config: Config):
+    max_symbol_len = max(len(s) for s in config.symbols)
+    bar_width = config.width - max_symbol_len - 1
+
     end = datetime.date.today()
     start = end - datetime.timedelta(days=config.historical_days)
     lows_highs = yahoo_query_historical_lows_highs(start, end, config.symbols)
-    max_symbol_len = max(len(s) for s in config.symbols)
-    bar_width = config.width - max_symbol_len - 1
 
     if bar_width < 5:
         raise RuntimeError('The width setting is too small, see parameter --width.')
