@@ -28,10 +28,9 @@ def load_config():
     parser = argparse.ArgumentParser(
         description='Show the current value of stocks',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('-symbols',
+    parser.add_argument('--symbols',
                         nargs='+',
                         help='A symbol to query quotes for',
-                        required=False,
                         default=load_configfile())
     args = parser.parse_args()
     return Config(symbols=args.symbols)
