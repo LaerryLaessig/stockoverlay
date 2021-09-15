@@ -13,7 +13,6 @@ import requests
 from colorama import init, Fore, Style
 
 Config = namedtuple('Config', ['symbols'])
-# stocks = ('AMC', 'GRWG')
 
 # raw data
 StockData = namedtuple('StockData', 'name currency price change change_prct \
