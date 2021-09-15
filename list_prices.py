@@ -30,7 +30,7 @@ def load_config():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--symbols',
                         nargs='+',
-                        help='A symbol to query quotes for',
+                        help='One ore more symbols to query quotes for',
                         default=load_configfile())
     args = parser.parse_args()
     return Config(symbols=args.symbols)
