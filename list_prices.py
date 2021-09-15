@@ -4,13 +4,15 @@
 # can do whatever you want with this stuff. If we meet some day, and you think
 # this stuff is worth it, you can buy me a beer in return LaerryLaessig
 # ----------------------------------------------------------------------------
+import argparse
+import json
 from collections import namedtuple
 from time import sleep
 
 import requests
 from colorama import init, Fore, Style
 
-stocks = ('AMC', 'GRWG')
+Config = namedtuple('Config', ['symbols'])
 
 # raw data
 StockData = namedtuple('StockData', 'name currency price change change_prct \
@@ -20,6 +22,24 @@ StockData = namedtuple('StockData', 'name currency price change change_prct \
 FormattedStockData = namedtuple('FormattedStockData', 'name price change change_prct \
                                                        pre_price pre_change pre_change_prct \
                                                        post_price post_change post_change_prct')
+
+
+def load_config():
+    parser = argparse.ArgumentParser(
+        description='Show the current value of stocks',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('--symbols',
+                        nargs='+',
+                        help='One ore more symbols to query quotes for',
+                        default=load_configfile())
+    args = parser.parse_args()
+    return Config(symbols=args.symbols)
+
+
+def load_configfile():
+    with open('config.json') as config_file:
+        cfg = json.load(config_file)
+    return cfg['stocks']
 
 
 def currency_as_str(currency):
@@ -90,9 +110,10 @@ def change_color(change):
     return Fore.GREEN if '+' in change else Fore.RED if '-' in change else ''
 
 
-def start():
+def start(config):
     pre_name = '- pre'
     post_name = '- post'
+    stocks = config.symbols
     while True:
         to_print = []
         for data in format_stock_data(get_yahoo_stock_data(stocks)):
@@ -131,4 +152,4 @@ def start():
 
 if __name__ == '__main__':
     init()
-    start()
+    start(load_config())
